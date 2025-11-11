@@ -60,6 +60,16 @@ Read the dataset used in this assignment. Pay attention to the extension of the 
 
 ```{r}
 
+install.packages("readxl")
+library(readxl)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(car)
+library(lmtest)
+
+model_data <- read_excel("C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025/data/assignment_3_dataset.xlsx")
+view(model_data)
 ```
 
 ## Data and model diagnostics 
@@ -69,6 +79,12 @@ Read the dataset used in this assignment. Pay attention to the extension of the 
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
+model_data %>% 
+  summary()
+
+model_data %>% 
+  describe()
+
 
 ```
 
@@ -77,7 +93,11 @@ Run an exploratory data analysis (EDA) to investigate the dataset.
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
 ```{r}
+sum(model_data$mindfulness > 6, na.rm=TRUE)
+model_data[model_data$mindfulness == 6.22, "mindfulness" ] <- 6  #to edit the 6.22 value to a maximum of 6
 
+sum(model_data$pain > 10, na.rm=TRUE)
+model_data[model_data$pain == 50, "pain" ] <- 10 #to edit the 50 to the maximum of 10 on the scale
 ```
 
 ### Model diagnostics
@@ -87,6 +107,11 @@ In order to test the more complex model for outliers and to test the assumptions
 
 ```{r}
 
+complex_model <- lm(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + cortisol_saliva, model_data)
+
+complex_model %>% 
+  summary()
+
 ```
 
 #### Checking for influential outliers
@@ -94,6 +119,21 @@ In order to test the more complex model for outliers and to test the assumptions
 Check for outlier values in the model.
 
 ```{r}
+outliers <- cooks.distance(complex_model)
+
+n <- length(outliers)
+out_plot <- plot(outliers, main = "Cooks Distance for Influential Obs")
+
+cooks_df <- data.frame(
+  obs = 1:length(outliers),
+  cooks = outliers
+)
+  
+ggplot(cooks_df, aes(x = obs, y = cooks)) +
+  geom_point(color = "firebrick", size = 2) +
+  geom_hline(yintercept = 4/n, linetype = "dashed", color = "steelblue", linewidth = 1)
+
+# there are 8 influential outliers in the dataset
 
 ```
 
@@ -103,18 +143,30 @@ Check the normality assumption.
 
 ```{r}
 
+complex_model %>%
+  plot(which = 2)
+
+describe(residuals(complex_model)) #both the skew and kurtosis are well below 1 so the normality assumption is intact
+
 ```
 
 Check the linearity assumption.
 
 ```{r}
 
+complex_model %>% 
+  residualPlots() #none of this examinations results are significant, so the linearity of the model is intact, there is a linear trend between the predictor and the outcome
+
 ```
 
 Check the homoscedasticty assumption (homogeneity of variance).
 
 ```{r}
+complex_model %>%
+  plot(which = 3)
 
+complex_model %>% 
+  bptest() # Homoscedasticty is intact also.
 ```
 
 Check the multicollinearity assumption.
@@ -126,7 +178,14 @@ https://statisticalhorizons.com/multicollinearity
 http://blog.minitab.com/blog/understanding-statistics/handling-multicollinearity-in-regression-analysis
 
 ```{r}
+complex_model %>% 
+  vif()
 
+# Vif is intact in age, sex, stai_trait, mindfulness but 5.79 in cortisul_serum and 6.37 in cortisol_saliva, maybe there can be interaction between these two.
+
+model_data %>%
+select(pain, age, sex, STAI_trait,mindfulness, cortisol_serum, cortisol_saliva) %>%
+pairs.panels(col = "red", lm = T) # bingo, there's a 0.91 correlation between cortisol_serum and saliva we could drop one of those serum is a better predictor based on the summary compared to the saliva.
 ```
 
 ### Making decision based on model diagnostics
@@ -134,12 +193,19 @@ http://blog.minitab.com/blog/understanding-statistics/handling-multicollinearity
 If based on the assumption tests you decide to drop a predictor variable you should do that here. Create your updated model.
 
 ```{r}
+complex_model_fin <- lm(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, model_data)
+
+complex_model_fin %>% 
+summary()
 
 ```
 
 #### Checking outliers of the updated model
 
 ```{r}
+
+outliers2 <- cooks.distance(complex_model_fin)
+plot(outliers2)
 
 ```
 
@@ -149,11 +215,19 @@ Normality assumption
 
 ```{r}
 
+complex_model_fin %>%
+  plot(which = 2)
+
+describe(residuals(complex_model))
+
 ```
 
 Linearity assumption
 
 ```{r}
+
+complex_model_fin %>% 
+  residualPlots()
 
 ```
 
@@ -161,11 +235,21 @@ Homoscedasticty assumption (homogeneity of variance)
 
 ```{r}
 
+complex_model_fin %>%
+  plot(which = 3)
+
+complex_model_fin %>% 
+  bptest()
+
 ```
 
 Multicollinearity assumption
 
 ```{r}
+
+complex_model_fin %>% 
+    vif()
+#great, now the model is better performing.
 
 ```
 
@@ -175,17 +259,37 @@ Create the simple model and get the results of the model that needs to be report
 
 ```{r}
 
+simple_model <- lm(pain ~ age + sex, model_data)
+
+summary(simple_model)
+AIC(simple_model)
+
+#df = 156
+#adj.R2 = 0.06
+#F = 4.675
+#p-value: 0.003719
+
 ```
 
 Create the more complex model based on the results of the model diagnostics. Also, get the results that needs to be reported based on the What to report section.
 
 ```{r}
 
+complex_model_fin <- lm(formula = pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, data = model_data)
+
+summary(complex_model_fin)
+AIC(complex_model_fin)
+
+#df = 153
+#adj.R2 = 0.27
+#F = 11.07
+#p-value = 3.119e-10
 ```
 
 Compare the two models.
 
 ```{r}
 
+# The more complex model works better than the simple one, it can explain more of the variance in the dataset by a mile (0.27 > 0.06), its also more likely to be significant according to the p-value, and the independent variables significantly improve the fitness of the model compared to the intercept only model. Also the AIC suggests that the complex model contains less errors and fits better.
 ```
 
