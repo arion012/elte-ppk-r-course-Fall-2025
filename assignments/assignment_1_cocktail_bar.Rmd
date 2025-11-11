@@ -33,6 +33,12 @@ Read the cocktail dataset from: <https://github.com/nthun/cocktail-balance> You 
 
 ```{r}
 
+dc <- read.delim("https://raw.githubusercontent.com/nthun/cocktail-balance/refs/heads/master/cocktail_data.tsv", sep = "\t")
+view(dc)
+
+install.packages("psych")
+library(psych)
+
 ```
 
 ## 2. Transform the data table and clean the ingredient variable!
@@ -40,7 +46,19 @@ Read the cocktail dataset from: <https://github.com/nthun/cocktail-balance> You 
 The ingredients are currently in a single cell for each cocktail. It would be better to put them in separate rows. Also, the variable should be cleaned of all quantities (e.g. 1/2 oz, 2 dashes, etc.), and the indicator of alcohol content (e.g. 47.3% abv). You will need to use this cleaned table in later tasks.
 
 ```{r}
+dc$ingredients <- gsub("oz", "", dc$ingredients)
+dc$ingredients <- gsub("[0-9]","", dc$ingredients)
+dc$ingredients <- gsub("/","", dc$ingredients)
+dc$ingredients <- gsub("(% abv)","", dc$ingredients)
+dc$ingredients <- gsub("^[^a-zA-Z]","", dc$ingredients)
+dc$ingredients <- gsub("\\(|\\)\\s*", "", dc$ingredients)
+dc$ingredients <- gsub("\\.\\s*", "", dc$ingredients)
+dc$ingredients <- gsub("\\s*", "", dc$ingredients)
 
+
+dc <- dc %>% separate(ingredients, into = c("ingredient1", "ingredient2", "ingredient3", "ingredient4"), sep = "<br>")
+view(dc)
+# dc[dc=="simple"] <- "simplesyrup" I'm not sure if this code is neceesary and "simple" counts as a whole ingredient, or only a short version of simplsyrup
 ```
 
 ## 3. All ingredients in alphabetical order
@@ -48,6 +66,23 @@ The ingredients are currently in a single cell for each cocktail. It would be be
 Before opening the bar, you need to find a reliable supplier that has all the ingredients. You need to send a list of all possible ingredients you will need. They don't need the quantities (i.e. how many of these are needed), just the names of the ingredients.
 
 ```{r}
+install.packages("tidytext")
+library(tidytext)
+
+summary(dc$ingredient1)
+
+supply <- dc %>%
+  unnest_tokens(word, ingredient1) %>% 
+  unnest_tokens(word, ingredient2) %>% 
+  unnest_tokens(word, ingredient3) %>% 
+  unnest_tokens(word, ingredient4) %>% 
+  count(word)
+
+supply <- drop_na(supply)
+
+
+list_ing <- sort(supply$word)
+list_ing
 
 ```
 
@@ -57,6 +92,8 @@ How many different ingredients you will need?
 
 ```{r}
 
+numberofing <- length(list_ing)
+numberofing
 ```
 
 ## 5. What are the top 10 ingredients?
@@ -64,7 +101,8 @@ How many different ingredients you will need?
 What are the 10 most frequently used ingredients? If there are ties, you can list more than 10.
 
 ```{r}
-
+supply5 <- supply[order(supply$n, decreasing = TRUE), ]
+top_n(supply5, 10,)
 ```
 
 ## 6. Which cocktail(s) has/have the most ingredients?
@@ -73,6 +111,17 @@ Count the number of ingredients and filter all the cocktails that has that many.
 
 ```{r}
 
+most <- dc %>% 
+  select(name,ingredient1,ingredient2, ingredient3, ingredient4)
+
+most <- most %>%
+  mutate(count = rowSums(!is.na(.)))
+most <- most %>% 
+  mutate(count = count - 1) # to account for the names
+
+most %>% 
+  filter(count==4) %>% 
+  select(name)
 ```
 
 ## 7. How many ingredients appear in only one cocktail (rare ingredient)?
@@ -80,19 +129,44 @@ Count the number of ingredients and filter all the cocktails that has that many.
 Count all cocktails with only one ingredient, and
 
 ```{r}
+rarei <- supply %>% 
+  filter(n == 1)
+
+rarei %>% 
+  count()
 
 ```
 
 ## 8. Which cocktail has an ingredient that is only used in one cocktail?
 
 ```{r}
+install.packages("purrr")
+library(purrr)
+
+rare1 <- dc %>%
+    filter(map_lgl(ingredient1, ~ any(unlist(rarei) %in% .x)))
+rare2 <- dc %>%
+    filter(map_lgl(ingredient2, ~ any(unlist(rarei) %in% .x)))
+rare3 <- dc %>%
+    filter(map_lgl(ingredient3, ~ any(unlist(rarei) %in% .x)))
+rare4 <- dc %>%
+    filter(map_lgl(ingredient4, ~ any(unlist(rarei) %in% .x)))
+
+rarecoctails <- as.data.frame(do.call(rbind, list(rare1,rare2,rare3,rare4)))
+rarecoctails <- rarecoctails$name
 
 ```
 
 ## 9. What are the cocktails without rare ingredients?
 
 ```{r}
-  
+
+common_coctials <- dc %>%
+  filter(!name %in% rarecoctails)
+
+common_coctails <- common_coctials$name
+common_coctails 
+
 ```
 
 ## 10. Create a cheat sheet for the bartender!
@@ -108,6 +182,33 @@ tribble(~name, ~Lime, ~`White rum`, ~`Cane sugar`, ~`Coca-cola`, ~Mint, ~Soda,
 ```
 
 ```{r}
+namelist_ing = "name"
+namelist_ing = c(namelist_ing,list_ing)
+namelist_ing
+
+data10 <- dc %>% 
+  select(name,ingredient1,ingredient2,ingredient3,ingredient4)
+  
+
+data10
+
+data10 <- unite(data10, ingredient1, ingredient2, ingredient3, ingredient4, sep = ",")
+data10long <- data10 %>%
+  separate_rows(ingredient1, sep = ",\\s*")
+
+data10long <- subset(data10long, ingredient1 != "NA") 
+  
+view(data10long)
+
+cocktail_m <- data10long %>%
+  mutate(value = "X") %>%
+  pivot_wider(
+    names_from = ingredient1,
+    values_from = value,
+    values_fill = "",  
+  )
+view(cocktail_m)
+
 
 ```
 
