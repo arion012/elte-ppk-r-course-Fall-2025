@@ -1,8 +1,10 @@
 ---
-title: "Assignment 1: The cocktail bar (data transformation and manipulation)"
+title: 'Assignment 1: The cocktail bar (data transformation and manipulation)'
 author: "Tamas Nagy"
-output: html_document
-editor_options: 
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -15,8 +17,12 @@ editor_options:
 -   String manipulation (e.g. stringr)
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+
+install.packages("tidyverse")
 library(tidyverse)
+
 ```
 
 # Background
@@ -31,7 +37,7 @@ Note: There are several different ways to solve these tasks, feel free to come u
 
 Read the cocktail dataset from: <https://github.com/nthun/cocktail-balance> You can also find the codebook there.
 
-```{r}
+```{r, include=FALSE}
 
 dc <- read.delim("https://raw.githubusercontent.com/nthun/cocktail-balance/refs/heads/master/cocktail_data.tsv", sep = "\t")
 view(dc)
@@ -154,6 +160,7 @@ rare4 <- dc %>%
 
 rarecoctails <- as.data.frame(do.call(rbind, list(rare1,rare2,rare3,rare4)))
 rarecoctails <- rarecoctails$name
+rarecoctails
 
 ```
 
@@ -184,13 +191,9 @@ tribble(~name, ~Lime, ~`White rum`, ~`Cane sugar`, ~`Coca-cola`, ~Mint, ~Soda,
 ```{r}
 namelist_ing = "name"
 namelist_ing = c(namelist_ing,list_ing)
-namelist_ing
 
 data10 <- dc %>% 
   select(name,ingredient1,ingredient2,ingredient3,ingredient4)
-  
-
-data10
 
 data10 <- unite(data10, ingredient1, ingredient2, ingredient3, ingredient4, sep = ",")
 data10long <- data10 %>%
@@ -207,7 +210,7 @@ cocktail_m <- data10long %>%
     values_from = value,
     values_fill = "",  
   )
-view(cocktail_m)
+cocktail_m
 
 
 ```
