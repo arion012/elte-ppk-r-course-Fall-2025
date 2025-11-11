@@ -31,7 +31,63 @@ The 2020-09-22 TidyTueday datasets are about climbing expeditions. From the thre
 -   The bar colors use the viridis palette and light theme.
 
 ```{r}
+expeditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-09-22/expeditions.csv')
+view(expeditions)
 
+
+install.packages("forcats")
+library(forcats)
+install.packages("viridis")
+library(viridis)
+
+expeditions %>% 
+  group_by(peak_name) %>% 
+  count(season)
+
+top15withother <- expeditions %>% 
+  mutate(peak_name = fct_lump(peak_name, n = 15)) %>% 
+  count(peak_name, season) %>%
+  group_by(peak_name) %>%
+  mutate(total = sum(n)) %>%
+  arrange(desc(total), peak_name, season)
+
+top15withother <- expeditions %>% 
+  mutate(peak_name = fct_lump(peak_name, n = 15)) %>% 
+  count(peak_name, sort = TRUE) %>% 
+    left_join(
+    expeditions %>%
+      group_by(peak_name) %>%
+      count(season),
+    by = "peak_name")
+
+top15withother
+
+seasonstop15wo <- top15withother %>%
+  pivot_wider(
+    names_from = season,  
+    values_from = n.y 
+  )
+
+top15 <- seasonstop15wo[-c(1,17), ]
+
+top15
+
+top15_long <- top15 %>%
+  pivot_longer(cols = c(Autumn, Spring, Summer, Winter, Unknown),
+               names_to = "season",
+               values_to = "count")
+
+top15_long %>%
+  mutate(peak_name = fct_reorder(peak_name, n.x)) %>%
+  ggplot(aes(x = peak_name, y = count, fill = season)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis(discrete = TRUE) +
+  xlab("") +
+  ylab("Number of expeditions") +
+  theme_light() +
+  ggtitle("The 15 most popular peaks stacked by seasons of expedition") +
+  coord_flip() +
+  legend(x = "bottom")
 ```
 
 ## Task 2: PhDs awarded
@@ -45,6 +101,28 @@ Notes:
 -   The line size is 1.2, the colors are from the brewer "Dark2" palette. The theme is set to minimal.
 
 ```{r}
+install.packages("scales")
+library(scales)
+
+phddata <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/refs/heads/main/data/2019/2019-02-19/phd_by_field.csv")
+view(phddata)
+
+phddata <- na.omit(phddata)
+
+phdplot <- aggregate(phddata$n_phds, by = list(phddata$broad_field, phddata$year), sum)
+phdplot
+
+phdplot %>% 
+  ggplot( 
+    aes(x = Group.2, y = x)) +
+    geom_line(aes(color = Group.1, ),size = 1.2 ) +
+    theme_minimal() +
+    ggtitle("Number of awarded Ph.D-s in the US by year") +
+    xlab("") +
+    ylab("") +
+    scale_x_continuous(breaks = breaks_pretty(5)) +
+    scale_y_continuous(labels = scales::comma) +
+    scale_color_brewer(palette = "Dark2")
 
 ```
 
@@ -59,5 +137,34 @@ Notes:
 -   The point size is 2, . The theme is set to light.
 
 ```{r}
+commute_mode <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2019/2019-11-05/commute.csv")
+view(commute_mode)
 
+commute_data <- aggregate(commute_mode$n, by = list(commute_mode$mode, commute_mode$state), sum)
+commute_data
+
+commute_data_bike_walk <- commute_data %>%
+  pivot_wider(
+    names_from = Group.1,  
+    values_from =  x
+  )
+commute_data_bike_walk <- as.data.frame(commute_data_bike_walk)
+
+colnames(commute_data_bike_walk)[colnames(commute_data_bike_walk) == "Group.2"] <- "state"
+commute_data_bike_walk
+
+commute_final <- merge(commute_data_bike_walk, commute_mode, by = "state", all.x = TRUE)
+
+subset(commute_final, state != "Ca") # there was only one Ca row in the original dataset so I had to exclude it to be able to make the chart. 
+
+commute_final
+
+ggplot(commute_final, aes(x= log(Walk), y=log(Bike), color = state_region)) +
+  geom_point(aes(size = 2)) +
+  theme_light() +
+  ylab("Number of people biking to work (Log N)") +
+  xlab("Number of people walking to work (Log N)") +
+  guides(size = "none") +
+  ggtitle("Title number of people walking vs. biking to work in each USA state") +
+  geom_text(aes(label = substr(state, 1, 2)), color = "black", vjust = -0.5)
 ```
