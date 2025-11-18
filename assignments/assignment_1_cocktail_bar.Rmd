@@ -71,10 +71,12 @@ view(dc)
 
 Before opening the bar, you need to find a reliable supplier that has all the ingredients. You need to send a list of all possible ingredients you will need. They don't need the quantities (i.e. how many of these are needed), just the names of the ingredients.
 
-```{r}
+```{r, include=FALSE}
 install.packages("tidytext")
 library(tidytext)
+```
 
+```{r}
 summary(dc$ingredient1)
 
 supply <- dc %>%
@@ -145,10 +147,12 @@ rarei %>%
 
 ## 8. Which cocktail has an ingredient that is only used in one cocktail?
 
-```{r}
+```{r, include=FALSE}
 install.packages("purrr")
 library(purrr)
+```
 
+```{r}
 rare1 <- dc %>%
     filter(map_lgl(ingredient1, ~ any(unlist(rarei) %in% .x)))
 rare2 <- dc %>%
@@ -210,7 +214,8 @@ cocktail_m <- data10long %>%
     values_from = value,
     values_fill = "",  
   )
-cocktail_m
+
+view(cocktail_m)
 
 
 ```
