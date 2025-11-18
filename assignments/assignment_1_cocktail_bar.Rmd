@@ -215,7 +215,7 @@ cocktail_m <- data10long %>%
     values_fill = "",  
   )
 
-view(cocktail_m)
+cocktail_m
 
 
 ```
