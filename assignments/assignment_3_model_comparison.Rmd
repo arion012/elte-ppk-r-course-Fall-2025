@@ -58,14 +58,17 @@ In your discussion of the findings, briefly interpret the results of the above a
 
 Read the dataset used in this assignment. Pay attention to the extension of the datafile.
 
-```{r}
+```{r, include=FALSE}
 
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
 install.packages("readxl")
 library(readxl)
 library(tidyverse)
 library(psych)
 library(ggplot2)
+install.packages("car")
 library(car)
+install.packages("lmtest")
 library(lmtest)
 
 model_data <- read_excel("C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025/data/assignment_3_dataset.xlsx")
@@ -78,13 +81,12 @@ view(model_data)
 
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
-```{r}
+```{r, include=TRUE}
 model_data %>% 
   summary()
 
 model_data %>% 
   describe()
-
 
 ```
 
@@ -92,7 +94,7 @@ model_data %>%
 
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
-```{r}
+```{r,include=TRUE}
 sum(model_data$mindfulness > 6, na.rm=TRUE)
 model_data[model_data$mindfulness == 6.22, "mindfulness" ] <- 6  #to edit the 6.22 value to a maximum of 6
 
@@ -105,7 +107,7 @@ model_data[model_data$pain == 50, "pain" ] <- 10 #to edit the 50 to the maximum 
 
 In order to test the more complex model for outliers and to test the assumptions first build the model.
 
-```{r}
+```{r, include=TRUE}
 
 complex_model <- lm(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + cortisol_saliva, model_data)
 
@@ -118,7 +120,7 @@ complex_model %>%
 
 Check for outlier values in the model.
 
-```{r}
+```{r, include=TRUE}
 outliers <- cooks.distance(complex_model)
 
 n <- length(outliers)
@@ -141,7 +143,7 @@ ggplot(cooks_df, aes(x = obs, y = cooks)) +
 
 Check the normality assumption.
 
-```{r}
+```{r, include=TRUE}
 
 complex_model %>%
   plot(which = 2)
@@ -152,7 +154,7 @@ describe(residuals(complex_model)) #both the skew and kurtosis are well below 1 
 
 Check the linearity assumption.
 
-```{r}
+```{r, include=TRUE}
 
 complex_model %>% 
   residualPlots() #none of this examinations results are significant, so the linearity of the model is intact, there is a linear trend between the predictor and the outcome
@@ -161,7 +163,7 @@ complex_model %>%
 
 Check the homoscedasticty assumption (homogeneity of variance).
 
-```{r}
+```{r, include=TRUE}
 complex_model %>%
   plot(which = 3)
 
@@ -177,7 +179,7 @@ Some info about VIF:
 https://statisticalhorizons.com/multicollinearity
 http://blog.minitab.com/blog/understanding-statistics/handling-multicollinearity-in-regression-analysis
 
-```{r}
+```{r, include=TRUE}
 complex_model %>% 
   vif()
 
@@ -192,7 +194,7 @@ pairs.panels(col = "red", lm = T) # bingo, there's a 0.91 correlation between co
 
 If based on the assumption tests you decide to drop a predictor variable you should do that here. Create your updated model.
 
-```{r}
+```{r, include=TRUE}
 complex_model_fin <- lm(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, model_data)
 
 complex_model_fin %>% 
@@ -202,7 +204,7 @@ summary()
 
 #### Checking outliers of the updated model
 
-```{r}
+```{r, include=TRUE}
 
 outliers2 <- cooks.distance(complex_model_fin)
 plot(outliers2)
@@ -213,7 +215,7 @@ plot(outliers2)
 
 Normality assumption
 
-```{r}
+```{r, include=TRUE}
 
 complex_model_fin %>%
   plot(which = 2)
@@ -224,7 +226,7 @@ describe(residuals(complex_model))
 
 Linearity assumption
 
-```{r}
+```{r, include=TRUE}
 
 complex_model_fin %>% 
   residualPlots()
@@ -233,7 +235,7 @@ complex_model_fin %>%
 
 Homoscedasticty assumption (homogeneity of variance)
 
-```{r}
+```{r, include=TRUE}
 
 complex_model_fin %>%
   plot(which = 3)
@@ -245,7 +247,7 @@ complex_model_fin %>%
 
 Multicollinearity assumption
 
-```{r}
+```{r, include=TRUE}
 
 complex_model_fin %>% 
     vif()
@@ -257,7 +259,7 @@ complex_model_fin %>%
 
 Create the simple model and get the results of the model that needs to be reported based on the What to report section.
 
-```{r}
+```{r, include=TRUE}
 
 simple_model <- lm(pain ~ age + sex, model_data)
 
@@ -273,7 +275,7 @@ AIC(simple_model)
 
 Create the more complex model based on the results of the model diagnostics. Also, get the results that needs to be reported based on the What to report section.
 
-```{r}
+```{r, include=TRUE}
 
 complex_model_fin <- lm(formula = pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, data = model_data)
 
@@ -288,7 +290,7 @@ AIC(complex_model_fin)
 
 Compare the two models.
 
-```{r}
+```{r, include=TRUE}
 
 # The more complex model works better than the simple one, it can explain more of the variance in the dataset by a mile (0.27 > 0.06), its also more likely to be significant according to the p-value, and the independent variables significantly improve the fitness of the model compared to the intercept only model. Also the AIC suggests that the complex model contains less errors and fits better.
 ```
