@@ -87,11 +87,42 @@ If you find values in the dataset during the EDA, that are not correct based on 
 dataA[grep('-2672', dataA$household_income), ] 
 dataA[96, 12] <- 2672
 summary(dataA$household_income)
+
+dataA = dataA %>%
+mutate(sex = factor(recode(sex,
+"1" = "male",
+"0" = "female")))
+
+dataB = dataB %>%
+mutate(sex = factor(recode(sex,
+"1" = "male",
+"0" = "female")))
 ```
 
-## Old regression modell 
+## Old regression modell on dataA
 
 ```{r}
-complex_model_fin <- lm(formula = pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, data = dataA)
+install.packages("lme4")
+library(lme4)
+install.packages("cAIC4")
+library(cAIC4)
+install.packages("performance")
+library(performance)
+
+old_model <- lmer(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + (1 | hospital), data = dataA)
+summary(old_model)
+confint(old_model)
+model_performance(old_model)
+cAIC(old_model)$caic
+
+# The intercept of the model is 4.47, the fixed coefficents are age (-0,06) (CI: -0.09958978 -0.02469505), sexmale (0.39210) (CI: 0.04664124  0.74380963), sexMale (-0.10344) (CI: -2.55884755  2.33012706), STAI_trait (0.01463) (CI:-0.02815175  0.05744177), mindfulness (-0.32451) (CI: -0.49605502 -0.15274685) and cortisol_serum (0.61810) (CI: 0.39598053  0.84092435 ). Variance for the random intercept model for hospitals has a variance of 0.3011, which is a moderate effect on the outcome. The models intercept is 4.47787.
+
+# The results for the 3rd assigment: Intercept 4.26860, age -0.05996, sexmale 0.39433, sexwoman -0.35991, STAI_trait 0.02077, mindfulness -0.25702, cortisol_serum  0.59165. 
+
+# The two modell has similar outcomes, with little difference in the coefficents of the male gender, mindfulness, STAI_trait and cortisol_serum. Marginal R^2 is 0.314 so the, while conditional R^2 is 0.428, which means if I'm right that the fixed effect explains 0.314 of the variance while with the random predictors the explained variance is 0.428.
+```
+
+## Old regression modell on dataB
+```{r}
 
 ```
