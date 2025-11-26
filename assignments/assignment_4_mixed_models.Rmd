@@ -58,6 +58,10 @@ Compare the model coefficients and the confidence intervals observed in this ass
 Read the datasets used in this assignment. Pay attention to the extensions of the datafiles.
 
 ```{r}
+install.packages("foreign")
+library(foreign)
+dataA <- read.spss("C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025-arion012/data/assignment_4_dataset_A.sav", to.data.frame = TRUE)
+dataB <- read.spss("C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025-arion012/data/assignment_4_dataset_B.sav", to.data.frame = TRUE)
 
 ```
 
@@ -66,7 +70,13 @@ Read the datasets used in this assignment. Pay attention to the extensions of th
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
-
+summary(dataA)
+# there is a negatíve min for household_income which might be a coding mistake
+barplot(dataA$household_income)
+sapply(dataA, function(x) sum(is.na(x)))
+summary(dataB)
+sapply(dataB, function(x) sum(is.na(x)))
+# There is no missing data, in neither datasets, datapoints seem to be fine 
 ```
 
 ## Correct coding errors
@@ -74,6 +84,14 @@ Run an exploratory data analysis (EDA) to investigate the dataset.
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
 ```{r}
-
+dataA[grep('-2672', dataA$household_income), ] 
+dataA[96, 12] <- 2672
+summary(dataA$household_income)
 ```
 
+## Old regression modell 
+
+```{r}
+complex_model_fin <- lm(formula = pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum, data = dataA)
+
+```
