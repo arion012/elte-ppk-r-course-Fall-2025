@@ -9,6 +9,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
 ```
 
 # Introduction
@@ -71,13 +72,16 @@ Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
 summary(dataA)
-# there is a negatíve min for household_income which might be a coding mistake
+
 barplot(dataA$household_income)
 sapply(dataA, function(x) sum(is.na(x)))
 summary(dataB)
 sapply(dataB, function(x) sum(is.na(x)))
-# There is no missing data, in neither datasets, datapoints seem to be fine 
+
 ```
+
+There is no missing data, in neither datasets, datapoints seem to be fine 
+Also there is a negatíve min for household_income which might be a coding mistake
 
 ## Correct coding errors
 
@@ -145,4 +149,7 @@ predB_R2
 
 The model got an R^2 of 0.3226718 being ran on the second model, which is quite low. Compared to the conditional R^2 on data set A which was 0.428. But quite similar to the Margival R^2 which was 0.314. In the original setting in assigment 3 it got a R^2 of 0.27 which is lower compared to these outcomes.
 This upgrade in the mixed model can derive from taking in consideration the clustering of hospitals and acting on it by letting each one have its own intercept. While in the older model it wasn't considered and this addition raises the R^2 to a higher level. 
-The intercept corelated negatively with most fixed effects (mostly with age -0.594, mindfulness -0.414 and STAI_trait - 0.426), 
+The intercept correlated negatively with most fixed effects (mostly with age -0.594, mindfulness -0.414 and STAI_trait - 0.426), 
+Yet comparing the confidence intervals of the two research reveals that there are minor differences between the effect of the same random predictor groups which means that the effect is not based necessarily on hospital care and is part of a trend which is quite stable across multiple samples. 
+Strongest predictors to experienced pain according to these studies are the female gender (-0,1)(-0.35), mindfulness (-0.3)(-0.25) and cortisol serum (0.61), (0.59) but taking into consideration of the confidence intervals the effect of female gender might be 0 according to the mixed modell, and it wasnt significant in the first run neither so we should look out for it. 
+Honorable mention of predictors are the age (-0,05)(-0.06) which has low effect yet is significant. STAI on the contrary is neither impactful (0.02)(0.01) neither significant. 
