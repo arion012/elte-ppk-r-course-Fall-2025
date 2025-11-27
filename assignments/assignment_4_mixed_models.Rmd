@@ -143,5 +143,6 @@ predB_R2
 ```
 ## Discussuion
 
-The model got an R^2 of 0.3226718 being ran on the second model, which is quite low. Compared to the conditional R^2 on data set A which was 0.428. But quite similar to the Margival R^2 which was 0.314. In the original setting in assigment 3 it got a R^2 of 0.27 which is lower to these outcomes.
-This upgrade in the mixed model can derive from the clustering the hospitals  
+The model got an R^2 of 0.3226718 being ran on the second model, which is quite low. Compared to the conditional R^2 on data set A which was 0.428. But quite similar to the Margival R^2 which was 0.314. In the original setting in assigment 3 it got a R^2 of 0.27 which is lower compared to these outcomes.
+This upgrade in the mixed model can derive from taking in consideration the clustering of hospitals and acting on it by letting each one have its own intercept. While in the older model it wasn't considered and this addition raises the R^2 to a higher level. 
+The intercept corelated negatively with most fixed effects (mostly with age -0.594, mindfulness -0.414 and STAI_trait - 0.426), 
