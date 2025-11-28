@@ -480,7 +480,7 @@ extensions of the datafiles.</p>
 <pre><code>## package &#39;foreign&#39; successfully unpacked and MD5 sums checked
 ## 
 ## The downloaded binary packages are in
-##  C:\Users\ferge\AppData\Local\Temp\Rtmp6FZe75\downloaded_packages</code></pre>
+##  C:\Users\ferge\AppData\Local\Temp\RtmpKCeafx\downloaded_packages</code></pre>
 <pre class="r"><code>library(foreign)
 dataA &lt;- read.spss(&quot;C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025-arion012/data/assignment_4_dataset_A.sav&quot;, to.data.frame = TRUE)
 dataB &lt;- read.spss(&quot;C:/Users/ferge/Documents/elte-ppk-r-course-Fall-2025-arion012/data/assignment_4_dataset_B.sav&quot;, to.data.frame = TRUE)</code></pre>
@@ -597,54 +597,7 @@ mutate(sex = factor(recode(sex,
 </div>
 <div id="old-regression-modell-on-dataa" class="section level2">
 <h2>Old regression modell on dataA</h2>
-<pre class="r"><code>install.packages(&quot;lme4&quot;)</code></pre>
-<pre><code>## Installing package into &#39;C:/Users/ferge/AppData/Local/R/win-library/4.5&#39;
-## (as &#39;lib&#39; is unspecified)</code></pre>
-<pre><code>## package &#39;lme4&#39; successfully unpacked and MD5 sums checked</code></pre>
-<pre><code>## Warning: cannot remove prior installation of package &#39;lme4&#39;</code></pre>
-<pre><code>## Warning in file.copy(savedcopy, lib, recursive = TRUE): problema al copiar
-## C:\Users\ferge\AppData\Local\R\win-library\4.5\00LOCK\lme4\libs\x64\lme4.dll a
-## C:\Users\ferge\AppData\Local\R\win-library\4.5\lme4\libs\x64\lme4.dll:
-## Permission denied</code></pre>
-<pre><code>## Warning: restored &#39;lme4&#39;</code></pre>
-<pre><code>## 
-## The downloaded binary packages are in
-##  C:\Users\ferge\AppData\Local\Temp\Rtmp6FZe75\downloaded_packages</code></pre>
-<pre class="r"><code>library(lme4)</code></pre>
-<pre><code>## Cargando paquete requerido: Matrix</code></pre>
-<pre><code>## 
-## Adjuntando el paquete: &#39;Matrix&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
-## 
-##     expand, pack, unpack</code></pre>
-<pre class="r"><code>install.packages(&quot;cAIC4&quot;)</code></pre>
-<pre><code>## Installing package into &#39;C:/Users/ferge/AppData/Local/R/win-library/4.5&#39;
-## (as &#39;lib&#39; is unspecified)</code></pre>
-<pre><code>## package &#39;cAIC4&#39; successfully unpacked and MD5 sums checked
-## 
-## The downloaded binary packages are in
-##  C:\Users\ferge\AppData\Local\Temp\Rtmp6FZe75\downloaded_packages</code></pre>
-<pre class="r"><code>library(cAIC4)</code></pre>
-<pre><code>## Cargando paquete requerido: stats4</code></pre>
-<pre><code>## Cargando paquete requerido: nlme</code></pre>
-<pre><code>## 
-## Adjuntando el paquete: &#39;nlme&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:lme4&#39;:
-## 
-##     lmList</code></pre>
-<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     collapse</code></pre>
-<pre class="r"><code>install.packages(&quot;performance&quot;)</code></pre>
-<pre><code>## Installing package into &#39;C:/Users/ferge/AppData/Local/R/win-library/4.5&#39;
-## (as &#39;lib&#39; is unspecified)</code></pre>
-<pre><code>## package &#39;performance&#39; successfully unpacked and MD5 sums checked
-## 
-## The downloaded binary packages are in
-##  C:\Users\ferge\AppData\Local\Temp\Rtmp6FZe75\downloaded_packages</code></pre>
-<pre class="r"><code>library(performance)
-
-old_model &lt;- lmer(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + (1 | hospital), data = dataA)
+<pre class="r"><code>old_model &lt;- lmer(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + (1 | hospital), data = dataA)
 summary(old_model)</code></pre>
 <pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
 ## Formula: pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum +  
@@ -751,21 +704,24 @@ original setting in assigment 3 it got a R^2 of 0.27 which is lower
 compared to these outcomes. This upgrade in the mixed model can derive
 from taking in consideration the clustering of hospitals and acting on
 it by letting each one have its own intercept. While in the older model
-it wasn’t considered and this addition raises the R^2 to a higher level.
-The intercept correlated negatively with most fixed effects (mostly with
-age -0.594, mindfulness -0.414 and STAI_trait - 0.426), Yet comparing
-the confidence intervals of the two research reveals that there are
-minor differences between the effect of the same random predictor groups
-which means that the effect is not based necessarily on hospital care
-and is part of a trend which is quite stable across multiple samples.
-Strongest predictors to experienced pain according to these studies are
-the female gender (-0,1)(-0.35), mindfulness (-0.3)(-0.25) and cortisol
-serum (0.61), (0.59) but taking into consideration of the confidence
-intervals the effect of female gender might be 0 according to the mixed
-modell, and it wasnt significant in the first run neither so we should
-look out for it. Honorable mention of predictors are the age
-(-0,05)(-0.06) which has low effect yet is significant. STAI on the
-contrary is neither impactful (0.02)(0.01) neither significant.</p>
+it wasn’t considered and this addition raises the R^2 to a higher
+level.</p>
+<p>The intercept correlated negatively with most fixed effects (mostly
+with age -0.594, mindfulness -0.414 and STAI_trait - 0.426), Yet
+comparing the confidence intervals of the two research reveals that
+there are minor differences between the effect of the same random
+predictor groups which means that the effect is not based necessarily on
+hospital care and is part of a trend which is quite stable across
+multiple samples.</p>
+<p>Strongest predictors to experienced pain according to these studies
+are the female gender (-0,1)(-0.35), mindfulness (-0.3)(-0.25) and
+cortisol serum (0.61), (0.59) but taking into consideration of the
+confidence intervals the effect of female gender might be 0 according to
+the mixed modell, and it wasnt significant in the first run neither so
+we should look out for it.</p>
+<p>Honorable mention of predictors are the age (-0,05)(-0.06) which has
+low effect yet is significant. STAI on the contrary is neither impactful
+(0.02)(0.01) neither significant.</p>
 </div>
 </div>
 

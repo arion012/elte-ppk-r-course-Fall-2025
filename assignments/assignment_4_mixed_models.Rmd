@@ -105,14 +105,15 @@ mutate(sex = factor(recode(sex,
 
 ## Old regression modell on dataA
 
-```{r}
+```{r, include=FALSE}
 install.packages("lme4")
 library(lme4)
 install.packages("cAIC4")
 library(cAIC4)
 install.packages("performance")
 library(performance)
-
+```
+```{r}
 old_model <- lmer(pain ~ age + sex + STAI_trait + mindfulness + cortisol_serum + (1 | hospital), data = dataA)
 summary(old_model)
 confint(old_model)
@@ -133,6 +134,7 @@ The results for the 3rd assigment: Intercept 4.26860, age -0.05996, sexmale 0.39
 The two modell has similar outcomes, with little difference in the coefficents of the male gender, mindfulness, STAI_trait and cortisol_serum. Marginal R^2 is 0.314 so the, while conditional R^2 is 0.428, which means if I'm right that the fixed effect explains 0.314 of the variance while with the random predictors the explained variance is 0.428.
 
 ## Old regression modell on dataB
+
 ```{r}
 predictionB = predict(old_model, newdata = dataB, allow.new.levels = TRUE)
 
@@ -145,11 +147,15 @@ TSS <- sum((dataB$pain - mean_pain)^2)
 predB_R2 = 1 - (RSS/TSS)
 predB_R2
 ```
+
 ## Discussuion
 
 The model got an R^2 of 0.3226718 being ran on the second model, which is quite low. Compared to the conditional R^2 on data set A which was 0.428. But quite similar to the Margival R^2 which was 0.314. In the original setting in assigment 3 it got a R^2 of 0.27 which is lower compared to these outcomes.
 This upgrade in the mixed model can derive from taking in consideration the clustering of hospitals and acting on it by letting each one have its own intercept. While in the older model it wasn't considered and this addition raises the R^2 to a higher level. 
+
 The intercept correlated negatively with most fixed effects (mostly with age -0.594, mindfulness -0.414 and STAI_trait - 0.426), 
 Yet comparing the confidence intervals of the two research reveals that there are minor differences between the effect of the same random predictor groups which means that the effect is not based necessarily on hospital care and is part of a trend which is quite stable across multiple samples. 
+
 Strongest predictors to experienced pain according to these studies are the female gender (-0,1)(-0.35), mindfulness (-0.3)(-0.25) and cortisol serum (0.61), (0.59) but taking into consideration of the confidence intervals the effect of female gender might be 0 according to the mixed modell, and it wasnt significant in the first run neither so we should look out for it. 
+
 Honorable mention of predictors are the age (-0,05)(-0.06) which has low effect yet is significant. STAI on the contrary is neither impactful (0.02)(0.01) neither significant. 
